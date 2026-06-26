@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { auth } from '../../../../auth'
+import { auth } from '../../../auth'
 import { prisma } from '@engineering-copilot/db'
-import { inngest } from '../../../lib/inngest'
+import { inngest } from '../../lib/inngest'
 import { z } from 'zod'
 
 const CreateReviewSchema = z.object({
@@ -42,15 +42,16 @@ export async function POST(req: NextRequest) {
     data: {
       userId,
       title,
-      ticketText,
-      ticketUrl,
-      repoContext,
+      ...(ticketText !== undefined && { ticketText }),
+      ...(ticketUrl !== undefined && { ticketUrl }),
+      ...(repoContext !== undefined && { repoContext }),
       aiProvider,
       aiModel,
       isPublic: isDemo,
       status: 'ANALYZING',
     },
   })
+
 
   // Kick off background job
   await inngest.send({

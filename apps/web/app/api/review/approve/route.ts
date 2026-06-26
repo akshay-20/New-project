@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { auth } from '../../../../../auth'
+import { auth } from '../../../../auth'
 import { prisma } from '@engineering-copilot/db'
 import { inngest } from '../../../lib/inngest'
 import { z } from 'zod'

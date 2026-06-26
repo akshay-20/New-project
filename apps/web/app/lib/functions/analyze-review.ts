@@ -19,7 +19,6 @@ export const analyzeReview = inngest.createFunction(
     name: 'Analyze Review',
     retries: 2,
     concurrency: { limit: 10 },
-    timeouts: { run: '30m' },
   },
   { event: 'review/analyze' },
   async ({ event, step }) => {
@@ -35,11 +34,11 @@ export const analyzeReview = inngest.createFunction(
     const ctx = {
       reviewId,
       ticketText: review.ticketText ?? review.ticketUrl ?? '',
-      ticketUrl: review.ticketUrl ?? undefined,
-      repoContext: review.repoContext ?? undefined,
+      ...(review.ticketUrl !== null && { ticketUrl: review.ticketUrl }),
+      ...(review.repoContext !== null && { repoContext: review.repoContext }),
       aiProvider: review.aiProvider as AIProvider,
       aiModel: review.aiModel,
-      previousPhases: [],
+      previousPhases: [] as never[],
     }
 
     // ── Run all 10 phases ──
@@ -55,12 +54,12 @@ export const analyzeReview = inngest.createFunction(
             content: phase.content,
             status: phase.status,
             startedAt: phase.startedAt,
-            completedAt: phase.completedAt,
+            completedAt: phase.completedAt ?? null,
           },
           update: {
             content: phase.content,
             status: phase.status,
-            completedAt: phase.completedAt,
+            completedAt: phase.completedAt ?? null,
           },
         })
       })
