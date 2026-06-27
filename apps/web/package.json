@@ -1,0 +1,53 @@
+{
+  "name": "@engineering-copilot/web",
+  "version": "0.0.1",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "eslint . --ext .js,.jsx,.ts,.tsx",
+    "type-check": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@ai-sdk/anthropic": "^0.0.39",
+    "@ai-sdk/google": "^0.0.23",
+    "@ai-sdk/openai": "^0.0.42",
+    "@auth/prisma-adapter": "^2.11.2",
+    "@engineering-copilot/db": "*",
+    "@engineering-copilot/prompt-engine": "*",
+    "@engineering-copilot/types": "*",
+    "@radix-ui/react-dialog": "^1.1.0",
+    "@radix-ui/react-dropdown-menu": "^2.1.0",
+    "@radix-ui/react-select": "^2.1.0",
+    "@radix-ui/react-tabs": "^1.1.0",
+    "@radix-ui/react-toast": "^1.2.0",
+    "ai": "^3.2.0",
+    "clsx": "^2.1.0",
+    "inngest": "^3.20.0",
+    "lucide-react": "^0.400.0",
+    "next": "^14.2.0",
+    "next-auth": "^5.0.0-beta.19",
+    "react": "^18.3.0",
+    "react-dom": "^18.3.0",
+    "react-markdown": "^9.0.0",
+    "remark-gfm": "^4.0.0",
+    "tailwind-merge": "^2.3.0",
+    "zod": "^3.23.0"
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "@next/eslint-plugin-next": "^16.2.9",
+    "@types/react": "^18.3.0",
+    "@types/react-dom": "^18.3.0",
+    "@typescript-eslint/eslint-plugin": "^8.62.0",
+    "@typescript-eslint/parser": "^8.62.0",
+    "autoprefixer": "^10.4.0",
+    "eslint": "^10.5.0",
+    "postcss": "^8.4.0",
+    "prettier-plugin-tailwindcss": "^0.6.0",
+    "tailwindcss": "^3.4.0",
+    "typescript": "^5.4.0",
+    "typescript-eslint": "^8.62.0"
+  }
+}

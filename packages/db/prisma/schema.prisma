@@ -1,0 +1,192 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ─── Auth (NextAuth.js v5 compatible) ─────────────────────────────────────────
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  name      String?
+  image     String?
+  provider  String   @default("github")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  reviews  Review[]
+  accounts Account[]
+  sessions Session[]
+
+  @@map("users")
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+  @@map("accounts")
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("sessions")
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+  @@map("verification_tokens")
+}
+
+// ─── Core: Review ─────────────────────────────────────────────────────────────
+
+model Review {
+  id             String       @id @default(cuid())
+  userId         String
+  title          String
+  ticketUrl      String?
+  ticketText     String?      @db.Text
+  repoContext    String?      @db.Text
+  status         ReviewStatus @default(ANALYZING)
+  selectedOption Int? // 1, 2, or 3
+  aiProvider     String       @default("anthropic")
+  aiModel        String       @default("claude-opus-4-5")
+  isPublic       Boolean      @default(false) // for /demo shares
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+
+  user     User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  phases   ReviewPhase[]
+  options  ReviewOption[]
+  sections ReviewSection[]
+  exports  ReviewExport[]
+
+  @@index([userId, createdAt(sort: Desc)])
+  @@index([status])
+  @@map("reviews")
+}
+
+enum ReviewStatus {
+  ANALYZING
+  AWAITING_APPROVAL
+  GENERATING
+  COMPLETE
+  FAILED
+}
+
+// ─── Analysis Phases (10 phases, streamed live) ───────────────────────────────
+
+model ReviewPhase {
+  id           String      @id @default(cuid())
+  reviewId     String
+  phaseIndex   Int // 1–10
+  phaseKey     String // e.g. "dependency-graph"
+  phaseLabel   String
+  content      String      @db.Text
+  status       PhaseStatus @default(PENDING)
+  errorMessage String?
+  startedAt    DateTime?
+  completedAt  DateTime?
+
+  review Review @relation(fields: [reviewId], references: [id], onDelete: Cascade)
+
+  @@unique([reviewId, phaseIndex])
+  @@map("review_phases")
+}
+
+enum PhaseStatus {
+  PENDING
+  STREAMING
+  COMPLETE
+  FAILED
+}
+
+// ─── Implementation Options (2–3 per review) ─────────────────────────────────
+
+model ReviewOption {
+  id          String   @id @default(cuid())
+  reviewId    String
+  optionIndex Int // 1, 2, or 3
+  title       String
+  summary     String   @db.Text
+  tradeoffs   Json
+  // { pros: string[], cons: string[], effort: "low"|"medium"|"high",
+  //   risk: "low"|"medium"|"high", estimatedDays?: number }
+  createdAt   DateTime @default(now())
+
+  review Review @relation(fields: [reviewId], references: [id], onDelete: Cascade)
+
+  @@unique([reviewId, optionIndex])
+  @@map("review_options")
+}
+
+// ─── 28-Section Engineering Review ───────────────────────────────────────────
+
+model ReviewSection {
+  id           String    @id @default(cuid())
+  reviewId     String
+  sectionIndex Int // 1–28, display order
+  sectionKey   String // e.g. "rollback-strategy"
+  sectionTitle String
+  aiContent    String    @db.Text // original AI-generated markdown
+  userContent  String?   @db.Text // engineer's edited version (null = unedited)
+  editedByUser Boolean   @default(false)
+  editedAt     DateTime?
+
+  review Review @relation(fields: [reviewId], references: [id], onDelete: Cascade)
+
+  @@unique([reviewId, sectionIndex])
+  @@index([reviewId, sectionKey])
+  @@map("review_sections")
+}
+
+// ─── Exports ─────────────────────────────────────────────────────────────────
+
+model ReviewExport {
+  id        String       @id @default(cuid())
+  reviewId  String
+  format    ExportFormat
+  url       String? // Vercel Blob / S3 URL for PDF
+  createdAt DateTime     @default(now())
+
+  review Review @relation(fields: [reviewId], references: [id], onDelete: Cascade)
+
+  @@map("review_exports")
+}
+
+enum ExportFormat {
+  MARKDOWN
+  PDF
+  JIRA_COMMENT
+  ADO_COMMENT
+}
