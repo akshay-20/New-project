@@ -62,7 +62,7 @@ export function ReviewDetailClient({ review: initialReview }: ReviewDetailClient
     await fetchLatest()
   }
 
-  const badge = STATUS_BADGE[review.status]
+  const badge = STATUS_BADGE[review.status] ?? { label: 'Unknown', color: 'text-gray-400', icon: AlertCircle }
   const BadgeIcon = badge.icon
 
   // Determine which UI panel to show

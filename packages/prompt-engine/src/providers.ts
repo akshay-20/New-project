@@ -2,7 +2,7 @@ import type { AIProvider } from '@engineering-copilot/types'
 import { createAnthropic } from '@ai-sdk/anthropic'
 import { createOpenAI } from '@ai-sdk/openai'
 import { createGoogleGenerativeAI } from '@ai-sdk/google'
-import type { LanguageModel } from 'ai'
+import type { LanguageModelV1 } from 'ai'
 
 /**
  * Returns a Vercel AI SDK LanguageModel for the given provider + model string.
@@ -12,36 +12,36 @@ import type { LanguageModel } from 'ai'
  * 2. Add a case here
  * 3. That's it — all phases and generators use this function automatically
  */
-export function getProvider(provider: AIProvider, model: string): LanguageModel {
+export function getProvider(provider: AIProvider, model: string): LanguageModelV1 {
   switch (provider) {
     case 'anthropic': {
       const anthropic = createAnthropic({
-        apiKey: process.env['ANTHROPIC_API_KEY'],
+        apiKey: process.env.ANTHROPIC_API_KEY ?? '',
       })
-      return anthropic(model)
+      return anthropic(model) as LanguageModelV1
     }
 
     case 'openai': {
       const openai = createOpenAI({
-        apiKey: process.env['OPENAI_API_KEY'],
+        apiKey: process.env.OPENAI_API_KEY ?? '',
       })
-      return openai(model)
+      return openai(model) as LanguageModelV1
     }
 
     case 'google': {
       const google = createGoogleGenerativeAI({
-        apiKey: process.env['GOOGLE_GENERATIVE_AI_API_KEY'],
+        apiKey: process.env.GOOGLE_GENERATIVE_AI_API_KEY ?? '',
       })
-      return google(model)
+      return google(model) as LanguageModelV1
     }
 
     case 'ollama': {
       // Ollama is OpenAI-compatible — point at local endpoint
       const ollama = createOpenAI({
-        baseURL: process.env['OLLAMA_BASE_URL'] ?? 'http://localhost:11434/v1',
+        baseURL: process.env.OLLAMA_BASE_URL ?? 'http://localhost:11434/v1',
         apiKey: 'ollama', // required but ignored
       })
-      return ollama(model)
+      return ollama(model) as LanguageModelV1
     }
 
     default: {

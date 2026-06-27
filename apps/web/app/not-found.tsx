@@ -1,3 +1,5 @@
+import Link from 'next/link'
+
 export default function NotFound() {
   return (
     <main className="min-h-screen gradient-hero flex items-center justify-center text-center px-6">
@@ -7,9 +9,9 @@ export default function NotFound() {
         <p className="text-[--text-secondary] mb-8">
           This page doesn&apos;t exist or was moved.
         </p>
-        <a href="/" className="btn-primary px-6 py-3">
+        <Link href="/" className="btn-primary px-6 py-3">
           Back to home
-        </a>
+        </Link>
       </div>
     </main>
   )

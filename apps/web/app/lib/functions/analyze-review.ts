@@ -1,7 +1,7 @@
 import { inngest } from '../../lib/inngest'
 import { prisma } from '@engineering-copilot/db'
 import { runAllPhases, generateOptions, generateSections } from '@engineering-copilot/prompt-engine'
-import type { AIProvider } from '@engineering-copilot/types'
+import type { AIProvider, PhaseResult } from '@engineering-copilot/types'
 
 /**
  * Inngest function: orchestrates the full review pipeline.
@@ -63,7 +63,7 @@ export const analyzeReview = inngest.createFunction(
           },
         })
       })
-    })
+    }) as unknown as PhaseResult[]
 
     // ── Generate options ──
     const options = await step.run('generate-options', async () => {

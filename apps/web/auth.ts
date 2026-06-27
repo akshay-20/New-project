@@ -1,11 +1,12 @@
-import NextAuth from 'next-auth'
+import NextAuth, { type NextAuthConfig, type NextAuthResult } from 'next-auth'
 import GitHub from 'next-auth/providers/github'
 import Google from 'next-auth/providers/google'
 import { prisma } from '@engineering-copilot/db'
 import { PrismaAdapter } from '@auth/prisma-adapter'
+import type { Adapter } from 'next-auth/adapters'
 
-export const { handlers, signIn, signOut, auth } = NextAuth({
-  adapter: PrismaAdapter(prisma),
+const config: NextAuthConfig = {
+  adapter: PrismaAdapter(prisma) as Adapter,
   providers: [
     GitHub({
       clientId: process.env.GITHUB_CLIENT_ID!,
@@ -28,4 +29,13 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       return session
     },
   },
-})
+}
+
+const result = NextAuth(config)
+
+export const { handlers, signIn, signOut } = result
+
+/** Typed auth helper for middleware and server components */
+export const auth = result.auth as NextAuthResult['auth']
+
+export type { Session } from 'next-auth'
